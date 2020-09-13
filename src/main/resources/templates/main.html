@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div th:each="list : ${subscribes}">
+    <span class="subscribes" th:text="${list.value}"></span>
+</div>
+
+<button id="btn" name="btn">CALL</button>
+<button id="disconnect" name="disconnect">disconnect</button>
+
+</body>
+<script src="/webjars/jquery/3.1.0/jquery.min.js"></script>
+<script src="/webjars/sockjs-client/1.0.2/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/2.3.3/stomp.min.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function ($) {
+        var ids = document.getElementsByClassName('subscribes');
+
+        var socket = new SockJS('/websocket');
+        stompClient = Stomp.over(socket);
+        // SockJS와 stomp client를 통해 연결을 시도.
+        stompClient.connect({}, function (frame) {
+
+
+            for (var i = 0; i < ids.length; i++) {
+                stompClient.subscribe(ids[i].innerHTML, function (greeting) {
+                   console.log(greeting.body)
+                });
+            }
+
+        });
+
+    })
+
+    var stompClient = null;
+
+    $('#btn').click(function () {
+        $.ajax({
+            url: '/call/admin',
+            type: 'get',
+            success:function (data) {
+            },
+        })
+    });
+
+    $( "#disconnect" ).click(function() { disconnect(); });
+
+    function disconnect() {
+        if (stompClient !== null) {
+            stompClient.disconnect();
+        }
+        console.log("Disconnected");
+    }
+
+</script>
+</html>
